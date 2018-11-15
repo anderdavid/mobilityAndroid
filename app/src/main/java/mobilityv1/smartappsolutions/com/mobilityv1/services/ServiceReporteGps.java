@@ -3,12 +3,10 @@ package mobilityv1.smartappsolutions.com.mobilityv1.services;
 import android.app.Service;
 
 /**
- * Created by user on 12/12/2017.
+ * Created by usuario on 12/12/2017.
  */
-import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Binder;
@@ -18,7 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -28,7 +25,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -40,9 +36,8 @@ import java.util.Date;
 import java.util.Map;
 
 import mobilityv1.smartappsolutions.com.mobilityv1.ConectionManager.ConstanstConnection;
-import mobilityv1.smartappsolutions.com.mobilityv1.MainActivity;
 import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Localizacion;
-import mobilityv1.smartappsolutions.com.mobilityv1.modelo.User;
+import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Usuario;
 
 
 public class ServiceReporteGps extends Service implements  GoogleApiClient.ConnectionCallbacks,
@@ -58,7 +53,7 @@ public class ServiceReporteGps extends Service implements  GoogleApiClient.Conne
     private LocationRequest mLocationRequest = null;
     //private Location mLocation = null;
 
-    User user;
+    Usuario usuario;
 
 
 
@@ -82,7 +77,7 @@ public class ServiceReporteGps extends Service implements  GoogleApiClient.Conne
 
         Log.d(TAG, "onCreate()");
 
-        user = new User();
+        usuario = new Usuario();
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -160,7 +155,7 @@ public class ServiceReporteGps extends Service implements  GoogleApiClient.Conne
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
+            // to handle the case where the usuario grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
@@ -191,7 +186,7 @@ public class ServiceReporteGps extends Service implements  GoogleApiClient.Conne
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
+            // to handle the case where the usuario grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
@@ -203,7 +198,7 @@ public class ServiceReporteGps extends Service implements  GoogleApiClient.Conne
             Log.d(TAG, "latitud: "+location.getLatitude() + " longitud " + location.getLongitude()+" time:"+location.getTime());
 
 
-            final Localizacion localizacion = new Localizacion(getFormat24Fecha(),String.valueOf(location.getTime()),user.getIdDBUsuario(),String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()),"kra2");
+            final Localizacion localizacion = new Localizacion(getFormat24Fecha(),String.valueOf(location.getTime()), usuario.getIdDBUsuario(),String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()),"kra2");
             final RequestQueue requestQueueRegisterGps = Volley.newRequestQueue(ServiceReporteGps.this);
             StringRequest postRequest = new StringRequest(Request.Method.POST, ConstanstConnection.BASE_URL_REGISTER_GPS,
                     new Response.Listener<String>() {

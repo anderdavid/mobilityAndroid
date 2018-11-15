@@ -1,15 +1,13 @@
 package mobilityv1.smartappsolutions.com.mobilityv1.database;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Localizacion;
-import mobilityv1.smartappsolutions.com.mobilityv1.modelo.User;
+import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Usuario;
 
 /**
  * Created by user on 12/12/2017.
@@ -20,7 +18,7 @@ public class AdapterDB {
     private static final String TAG = "AdapterDB";
 
     private static final String DATABASE_NAME ="mobilityApp_testDB";
-    private static final int VERSION =2;
+    private static final int VERSION =3;
 
     public static  DatabaseHelper mDatabaseHelper;
     public static SQLiteDatabase mSqLiteDatabase;
@@ -42,7 +40,7 @@ public class AdapterDB {
         @Override
         public void onCreate(SQLiteDatabase db) {
 
-            db.execSQL(User.DATABASE_CREATE_TABLE_USUARIO);
+            db.execSQL(Usuario.DATABASE_CREATE_TABLE_USUARIO);
             db.execSQL(Localizacion.DATABASE_CREATE_TABLE_REPORTE_LOCALIZACION);
             Log.d(TAG, "onCreate table products " + Localizacion.DATABASE_TABLE_REPORTE_LOCALIZACION);
         }
@@ -52,7 +50,7 @@ public class AdapterDB {
 
             Log.d(TAG,"onUpgrade");
             db.execSQL("DROP TABLE IF EXISTS " + Localizacion.DATABASE_TABLE_REPORTE_LOCALIZACION);
-            db.execSQL("DROP TABLE IF EXISTS " + User.DATABASE_TABLE_USUARIO);
+            db.execSQL("DROP TABLE IF EXISTS " + Usuario.DATABASE_TABLE_USUARIO);
             onCreate(db);
         }
     }

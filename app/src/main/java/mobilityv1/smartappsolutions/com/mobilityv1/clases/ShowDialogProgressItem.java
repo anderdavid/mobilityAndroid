@@ -63,6 +63,7 @@ public class ShowDialogProgressItem {
     public void dimissDialog(){
 
         dialog.cancel();
+        timer.cancel();
 
     }
 

@@ -29,7 +29,7 @@ import mobilityv1.smartappsolutions.com.mobilityv1.ConectionManager.ConstanstCon
 import mobilityv1.smartappsolutions.com.mobilityv1.clases.ShowDialog;
 import mobilityv1.smartappsolutions.com.mobilityv1.clases.ShowDialogProgressItem;
 import mobilityv1.smartappsolutions.com.mobilityv1.database.AdapterDB;
-import mobilityv1.smartappsolutions.com.mobilityv1.modelo.User;
+import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Usuario;
 
 /**
  * Created by user on 30/11/2017.
@@ -44,6 +44,7 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
     EditText edtPassword;
     TextView txvRegister;
     Button btnButtonEntry;
+
     ShowDialogProgressItem mShowDialogProgressItem;
     ShowDialog mShowDialog;
 
@@ -52,6 +53,7 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
 
     String url;
     AdapterDB db;
+    Usuario mUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,44 +97,49 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
                     Toast.makeText(getApplicationContext(), "El campo password esta vacio", Toast.LENGTH_LONG).show();
                 }else{
 
-                    User mUser = new User(edtLogin.getText().toString(), edtPassword.getText().toString());
-                    url = mUser.getUrlLogin(ConstanstConnection.BASE_URL_LOGIN);
+                    mUsuario = new Usuario(edtLogin.getText().toString(), edtPassword.getText().toString());
+                    Log.d(TAG, mUsuario.toString());
+
+                    //url = mUsuario.getUrlLogin(ConstanstConnection.BASE_URL_LOGIN);
+                    url = ConstanstConnection.BASE_URL_API_REST+ConstanstConnection.URL_LOGIN;
                     Log.d(TAG, url);
 
                     final RequestQueue requestQueue = Volley.newRequestQueue(LoginActivity.this);
 
-                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 
                         @Override
                         public void onResponse(String response) {
 
                             requestQueue.stop();
+                            Log.d(TAG, response.toString());
+                            mShowDialogProgressItem.dimissDialog();
 
                             try {
-                                Log.d(TAG, response.toString());
+
                                 JSONObject jsonResponse = new JSONObject(response.toString());
                                 String status = jsonResponse.getString("status");
                                 Log.d(TAG, "status: " + status);
 
                                 if (status.equals("true")) {
 
-                                    mShowDialogProgressItem.dimissDialog();
+
 
                                     JSONObject jsonUser = jsonResponse.getJSONObject("usuario");
 
-                                    String id = jsonUser.getString(User.KEY_ID_USUARIO);
-                                    String nombre = jsonUser.getString(User.KEY_NOMBRE);
-                                    String apellido = jsonUser.getString(User.KEY_APELLIDO);
-                                    String fechaNacimiento = jsonUser.getString(User.KEY_CIUDAD);
-                                    String edad = jsonUser.getString(User.KEY_EDAD);
-                                    String genero = jsonUser.getString(User.KEY_GENERO);
-                                    String ciudad = jsonUser.getString(User.KEY_CIUDAD);
-                                    String email = jsonUser.getString(User.KEY_EMAIL);
-                                    String login = jsonUser.getString(User.KEY_LOGIN);
-                                    String password = jsonUser.getString(User.KEY_PASSWORD);
+                                    String id = jsonUser.getString(Usuario.KEY_ID_USUARIO);
+                                    String nombre = jsonUser.getString(Usuario.KEY_NOMBRE);
+                                    String apellido = jsonUser.getString(Usuario.KEY_APELLIDO);
+                                    String fechaNacimiento = jsonUser.getString(Usuario.KEY_CIUDAD);
+                                    String edad = jsonUser.getString(Usuario.KEY_EDAD);
+                                    String genero = jsonUser.getString(Usuario.KEY_GENERO);
+                                    String ciudad = jsonUser.getString(Usuario.KEY_CIUDAD);
+                                    String email = jsonUser.getString(Usuario.KEY_EMAIL);
+                                    String login = jsonUser.getString(Usuario.KEY_LOGIN);
+                                    String password = jsonUser.getString(Usuario.KEY_PASSWORD);
 
                                     Log.d(TAG, "se  obtiene objeto usuario a partir de respuesta JSON " +
-                                            "User{" +
+                                            "Usuario{" +
                                             " id='" + id + '\'' +
                                             " nombre='" + nombre + '\'' +
                                             ", apellido='" + apellido + '\'' +
@@ -146,22 +153,22 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
                                             '}'
                                     );
 
-                                    User user = new User(id, nombre, apellido, fechaNacimiento, edad, genero, ciudad, email, login, password);
-                                    Log.d(TAG, user.toString());
+                                    Usuario usuario = new Usuario(id, nombre, apellido, fechaNacimiento, edad, genero, ciudad, email, login, password);
+                                    Log.d(TAG, usuario.toString());
 
-                                    Cursor mCursor = user.fetchAllUsuarios("1");
+                                   Cursor mCursor = usuario.fetchAllUsuarios("1");
                                     if (mCursor.getCount() == 1) {
 
                                         Log.d(TAG, "ya existe un usuario logeado " + mCursor.getCount());
-                                        user.updateDBUsuario(1);
+                                        usuario.updateDBUsuario(1);
 
                                     } else {
 
                                         Log.d(TAG, "primer usuario registrado " + mCursor.getCount());
-                                        user.createDBUsuario();
+                                        usuario.createDBUsuario();
                                     }
 
-
+                                    testSQLite3();
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                    // finish();
@@ -174,6 +181,7 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
                                     mShowDialogProgressItem.dimissDialog();
                                     mShowDialog.setMessage("Usuario no encontrado");
                                     mShowDialog.showDialog();
+
 
                                 }
 
@@ -188,16 +196,17 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
                         @Override
                         public void onErrorResponse(VolleyError error) {
 
+                            mShowDialog.setMessage("El servidor no responde");
 
                         }
                     }) {
                         @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError {
-
-                            Map<String, String> params = new HashMap<String, String>();
-
+                        protected Map<String, String> getParams()
+                        {
+                            Map<String, String>  params = mUsuario.getPostParams();
                             return params;
                         }
+
                     };
 
                     requestQueue.add(stringRequest);
@@ -223,7 +232,7 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
     @Override
     public void onTimeOut() {
         Log.d(TAG,"onTimeOut()");
-        //Toast.makeText(LoginActivity.this,"Error en la conexion",Toast.LENGTH_LONG).show(); //_deb
+       // Toast.makeText(LoginActivity.this,"Error en la conexion",Toast.LENGTH_LONG).show(); //_deb
         //btnButtonEntry.setText("probando interface"); //_deb
         mShowDialog.showDialog();
     }
@@ -263,7 +272,7 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
         db = new AdapterDB(getApplicationContext());
         initDB();
 
-        User user = new User("David", "Rodriguez","1986-05-28", "31", "M", "Ipiales", "Anderdavid86@hotmail.com", "adrn","1234");
+        Usuario user = new Usuario("David", "Rodriguez","1986-05-28", "31", "M", "Ipiales", "Anderdavid86@hotmail.com", "adrn","1234");
 
         Cursor mCursor=user.fetchAllUsuarios("1");
 
@@ -284,18 +293,18 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
 
 
 
-        String nombre=cursor.getString(cursor.getColumnIndex(User.KEY_NOMBRE));
-        String apellido=cursor.getString(cursor.getColumnIndex(User.KEY_APELLIDO));
-        String fechaNacimiento=cursor.getString(cursor.getColumnIndex(User.KEY_FECHA_NACIMIENTO));
-        String edad=cursor.getString(cursor.getColumnIndex(User.KEY_EDAD));
-        String genero=cursor.getString(cursor.getColumnIndex(User.KEY_GENERO));
-        String ciudad=cursor.getString(cursor.getColumnIndex(User.KEY_CIUDAD));
-        String email=cursor.getString(cursor.getColumnIndex(User.KEY_EMAIL));
-        String login=cursor.getString(cursor.getColumnIndex(User.KEY_LOGIN));
-        String password=cursor.getString(cursor.getColumnIndex(User.KEY_PASSWORD));
+        String nombre=cursor.getString(cursor.getColumnIndex(Usuario.KEY_NOMBRE));
+        String apellido=cursor.getString(cursor.getColumnIndex(Usuario.KEY_APELLIDO));
+        String fechaNacimiento=cursor.getString(cursor.getColumnIndex(Usuario.KEY_FECHA_NACIMIENTO));
+        String edad=cursor.getString(cursor.getColumnIndex(Usuario.KEY_EDAD));
+        String genero=cursor.getString(cursor.getColumnIndex(Usuario.KEY_GENERO));
+        String ciudad=cursor.getString(cursor.getColumnIndex(Usuario.KEY_CIUDAD));
+        String email=cursor.getString(cursor.getColumnIndex(Usuario.KEY_EMAIL));
+        String login=cursor.getString(cursor.getColumnIndex(Usuario.KEY_LOGIN));
+        String password=cursor.getString(cursor.getColumnIndex(Usuario.KEY_PASSWORD));
 
         Toast.makeText(getApplicationContext(),
-                "User{" +
+                "Usuario{" +
                         "nombre='" + nombre + '\'' +
                         ", apellido='" + apellido + '\'' +
                         ", fechaNacimiento='" + fechaNacimiento + '\'' +
@@ -314,23 +323,24 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
 
     */// no delete
 
-    /*public void testSQLite3() {
-        User user = new User();
+    public void testSQLite3() {
+        Log.d(TAG, "testSQLite3()");
+        Usuario user = new Usuario();
         Cursor cursor = user.fetchAllUsuarios("1");
 
-        String mIdUsuario = cursor.getString(cursor.getColumnIndex(User.KEY_ID_USUARIO));
-        String mNombre = cursor.getString(cursor.getColumnIndex(User.KEY_NOMBRE));
-        String mApellido = cursor.getString(cursor.getColumnIndex(User.KEY_APELLIDO));
-        String mFechaNacimiento = cursor.getString(cursor.getColumnIndex(User.KEY_FECHA_NACIMIENTO));
-        String mEdad = cursor.getString(cursor.getColumnIndex(User.KEY_EDAD));
-        String mGenero = cursor.getString(cursor.getColumnIndex(User.KEY_GENERO));
-        String mCiudad = cursor.getString(cursor.getColumnIndex(User.KEY_CIUDAD));
-        String mEmail = cursor.getString(cursor.getColumnIndex(User.KEY_EMAIL));
-        String mLogin = cursor.getString(cursor.getColumnIndex(User.KEY_LOGIN));
-        String mPassword = cursor.getString(cursor.getColumnIndex(User.KEY_PASSWORD));
+        String mIdUsuario = cursor.getString(cursor.getColumnIndex(Usuario.KEY_ID_USUARIO));
+        String mNombre = cursor.getString(cursor.getColumnIndex(Usuario.KEY_NOMBRE));
+        String mApellido = cursor.getString(cursor.getColumnIndex(Usuario.KEY_APELLIDO));
+        String mFechaNacimiento = cursor.getString(cursor.getColumnIndex(Usuario.KEY_FECHA_NACIMIENTO));
+        String mEdad = cursor.getString(cursor.getColumnIndex(Usuario.KEY_EDAD));
+        String mGenero = cursor.getString(cursor.getColumnIndex(Usuario.KEY_GENERO));
+        String mCiudad = cursor.getString(cursor.getColumnIndex(Usuario.KEY_CIUDAD));
+        String mEmail = cursor.getString(cursor.getColumnIndex(Usuario.KEY_EMAIL));
+        String mLogin = cursor.getString(cursor.getColumnIndex(Usuario.KEY_LOGIN));
+        String mPassword = cursor.getString(cursor.getColumnIndex(Usuario.KEY_PASSWORD));
 
-        Log.d(TAG, "se obtinene usuario" +
-                "User{" +
+        Log.d(TAG, "se obtinene usuario desde bd" +
+                "Usuario{" +
                 "nombre='" + mNombre + '\'' +
                 ", idUsuario='" + mIdUsuario + '\'' +
                 ", apellido='" + mApellido + '\'' +
@@ -343,6 +353,6 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
                 ", password='" + mPassword + '\'' +
                 '}'
         );
-    }*/
+    }
 
 }

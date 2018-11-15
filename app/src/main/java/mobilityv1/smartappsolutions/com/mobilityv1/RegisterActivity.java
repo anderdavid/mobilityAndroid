@@ -1,15 +1,10 @@
 package mobilityv1.smartappsolutions.com.mobilityv1;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.icu.util.Calendar;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -17,7 +12,6 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -29,10 +23,9 @@ import com.android.volley.toolbox.Volley;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-import mobilityv1.smartappsolutions.com.mobilityv1.modelo.User;
+import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Usuario;
 
 /**
  * Created by user on 01/12/2017.
@@ -53,7 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
     Button register;
 
     private int mYear, mMonth, mDay;
-    User mUser;
+    Usuario mUsuario;
 
     String uNombre;
     String uApellido;
@@ -180,8 +173,8 @@ public class RegisterActivity extends AppCompatActivity {
                         Log.d(TAG,  "selected: "+uGenero);
 
 
-                        mUser = new User(uNombre, uApellido, uFechaNacimiento, uEdad, uGenero, uCiudad, uEmail, uLogin, uPassword);
-                        Log.d(TAG,mUser.toString());
+                        mUsuario = new Usuario(uNombre, uApellido, uFechaNacimiento, uEdad, uGenero, uCiudad, uEmail, uLogin, uPassword);
+                        Log.d(TAG, mUsuario.toString());
 
                         StringRequest postRequest = new StringRequest(Request.Method.POST, urlRegisterPost,
                                 new Response.Listener<String>()
@@ -207,7 +200,7 @@ public class RegisterActivity extends AppCompatActivity {
                             @Override
                             protected Map<String, String> getParams()
                             {
-                                Map<String, String>  params = mUser.getPostParams();
+                                Map<String, String>  params = mUsuario.getPostParams();
                                 return params;
                             }
                         };

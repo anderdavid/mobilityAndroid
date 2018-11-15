@@ -13,24 +13,24 @@ import mobilityv1.smartappsolutions.com.mobilityv1.database.AdapterDB;
  * Created by user on 30/11/2017.
  */
 
-public class User {
+public class Usuario {
 
-    public static String TAG ="User";
+    public static String TAG ="Usuario";
 
 
     public static final String DATABASE_TABLE_USUARIO="usuario";
     public static final String ID ="_id";
 
-    public static final String KEY_ID_USUARIO ="uId";
-    public final static String KEY_NOMBRE ="uNombre";
-    public final static String KEY_APELLIDO ="uApellido";
-    public final static String KEY_FECHA_NACIMIENTO="uFechaNacimiento";
-    public final static String KEY_EDAD ="uEdad";
-    public final static String KEY_GENERO ="uGenero";
-    public final static String KEY_CIUDAD ="uCiudad";
-    public final static String KEY_EMAIL ="uEmail";
-    public final static String KEY_LOGIN ="uLogin";
-    public final static String KEY_PASSWORD ="uPassword";
+    public static final String KEY_ID_USUARIO ="id";
+    public final static String KEY_NOMBRE ="nombre";
+    public final static String KEY_APELLIDO ="apellido";
+    public final static String KEY_FECHA_NACIMIENTO="fechacNacimiento";
+    public final static String KEY_EDAD ="edad";
+    public final static String KEY_GENERO ="genero";
+    public final static String KEY_CIUDAD ="ciudad";
+    public final static String KEY_EMAIL ="email";
+    public final static String KEY_LOGIN ="login";
+    public final static String KEY_PASSWORD ="password";
 
            /* "id": "1933",
             "nombre": "dfsf",
@@ -68,16 +68,16 @@ public class User {
                     " "+KEY_PASSWORD+" text);";
 
 
-    public User(){
+    public Usuario(){
 
     }
 
-    public User(String login, String password) {
+    public Usuario(String login, String password) {
         this.login = login;
         this.password = password;
     }
 
-    public User(String nombre, String apellido, String fechaNacimiento, String edad, String genero, String ciudad, String email, String login, String password) {
+    public Usuario(String nombre, String apellido, String fechaNacimiento, String edad, String genero, String ciudad, String email, String login, String password) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.fechaNacimiento = fechaNacimiento;
@@ -89,7 +89,7 @@ public class User {
         this.password = password;
     }
 
-    public User(String idUsuario, String nombre, String apellido, String fechaNacimiento, String edad, String genero, String ciudad, String email, String login, String password) {
+    public Usuario(String idUsuario, String nombre, String apellido, String fechaNacimiento, String edad, String genero, String ciudad, String email, String login, String password) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -185,7 +185,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "Usuario{" +
                 "idUsuario='" + idUsuario + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", apellido='" + apellido + '\'' +
@@ -208,6 +208,16 @@ public class User {
 
         Log.d(TAG,"url registro de usuario");
         return urlRegister.toString();
+    }
+
+    public Map<String, String> getPostParamsUrlLogin(){
+
+        Map<String, String>  params = new HashMap<String, String>();
+
+        params.put(KEY_LOGIN, this.login);
+        params.put(KEY_PASSWORD, this.password);
+
+        return params;
     }
 
     public Map<String, String> getPostParams(){
@@ -285,7 +295,7 @@ public class User {
 
     public String getIdDBUsuario() {
         Cursor mCursor=fetchAllUsuarios("1");
-        String idUsuario=mCursor.getString(mCursor.getColumnIndex(User.KEY_ID_USUARIO));
+        String idUsuario=mCursor.getString(mCursor.getColumnIndex(Usuario.KEY_ID_USUARIO));
         Log.d(TAG,"idUsuario "+idUsuario);
         return idUsuario;
     }
