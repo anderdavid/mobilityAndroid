@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ciudades">
+        <item>	Arauca	</item>
+        <item>	Armenia	</item>
+        <item>	Barranquilla	</item>
+        <item>	Bogotá	</item>
+        <item>	Bucaramanga	</item>
+        <item>	Cali	</item>
+        <item>	Cúcuta	</item>
+        <item>	Florencia	</item>
+        <item>	Ibagué	</item>
+        <item>	Ipiales	</item>
+        <item>	Leticia	</item>
+        <item>	Manizales	</item>
+        <item>	Medellín	</item>
+        <item>	Mitú	</item>
+        <item>	Mocoa	</item>
+        <item>	Montería	</item>
+        <item>	Neiva	</item>
+        <item>	Pasto	</item>
+        <item>	Pereira	</item>
+        <item>	Popayán	</item>
+        <item>	Puerto Carreño	</item>
+        <item>	Puerto Inírida	</item>
+        <item>	Quibdó	</item>
+        <item>	Riohacha	</item>
+        <item>	San Andrés	</item>
+        <item>	San José del Guaviare	</item>
+        <item>	Santa Marta	</item>
+        <item>	Sincelejo	</item>
+        <item>	Tunja	</item>
+        <item>	Valledupar	</item>
+        <item>	Villavicencio	</item>
+        <item>	Yopal	</item>
+    </string-array>
+</resources>
