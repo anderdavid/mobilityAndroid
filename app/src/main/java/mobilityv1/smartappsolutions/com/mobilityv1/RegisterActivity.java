@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import mobilityv1.smartappsolutions.com.mobilityv1.ConectionManager.ConstanstConnection;
 import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Usuario;
 
 /**
@@ -46,7 +47,6 @@ public class RegisterActivity extends AppCompatActivity {
     Button register;
 
     private int mYear, mMonth, mDay;
-    Usuario mUsuario;
 
     String uNombre;
     String uApellido;
@@ -59,12 +59,15 @@ public class RegisterActivity extends AppCompatActivity {
     String uCiudad="";
     String uGenero="";
 
-   // String urlRegisterPost="http://192.168.1.141/MOBILITY_V1/mobilty_api_v1_registerUser.php";
-   String urlRegisterPost="http://192.168.1.141/mobility_api_v1/usuario";
+    Usuario mUsuario;
+
+    String urlRegisterPost= ConstanstConnection.BASE_URL_API_REST+ConstanstConnection.URL_USUARIO;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.register);
         Log.d(TAG,TAG + " onCreate()");
 
@@ -79,11 +82,13 @@ public class RegisterActivity extends AppCompatActivity {
         rdgGenero =(RadioGroup)findViewById(R.id.register_rdg_genero);
         register = (Button)findViewById(R.id.register_btn_register);
 
-        final RequestQueue requestQueuePost = Volley.newRequestQueue(RegisterActivity.this);
-
         mYear= 1990;
         mMonth =12;
         mDay=1;
+        uFechaNacimiento="1990-01-01";
+        fechaNacimiento.setText(uFechaNacimiento);
+
+        final RequestQueue requestQueuePost = Volley.newRequestQueue(RegisterActivity.this);
 
         ArrayAdapter adapter = ArrayAdapter.createFromResource( this, R.array.ciudades , android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -140,6 +145,24 @@ public class RegisterActivity extends AppCompatActivity {
                 uPassword =password.getText().toString();
                 uPasswordConf =passwordConfirmacion.getText().toString();
 
+                int selectedRadioButtonID = rdgGenero.getCheckedRadioButtonId();
+                RadioButton selectedRadioButton = (RadioButton) findViewById(selectedRadioButtonID);
+                uGenero = selectedRadioButton.getText().toString();
+                Log.d(TAG,  "selected: "+uGenero);
+
+                uFechaNacimiento=fechaNacimiento.getText().toString();
+                Log.d(TAG,"fecha de nacimiento: "+uFechaNacimiento);
+
+                uCiudad = spinnerCiudad.getSelectedItem().toString();
+                Log.d(TAG,"ciudad: "+uCiudad);
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String dateActual = simpleDateFormat.format(new Date());
+                int diference = getDateDiference(dateActual,uFechaNacimiento.toString());
+                uEdad = String.valueOf(diference);
+                Log.d(TAG,"edad: "+uEdad);
+
+
                 if (uNombre.equals("")) {
                     Toast.makeText(getApplicationContext(),"El campo nombre esta vacio",Toast.LENGTH_LONG).show();
                 } else if (uApellido.equals("")) {
@@ -157,59 +180,41 @@ public class RegisterActivity extends AppCompatActivity {
                 }else if(!uPassword.equals(uPasswordConf)){
                     Toast.makeText(getApplicationContext(),"Los passwords no coinciden",Toast.LENGTH_LONG).show();
                 }else{
-                    uCiudad = spinnerCiudad.getSelectedItem().toString();
-                    Log.d(TAG,"ciudad: "+uCiudad);
 
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    String dateActual = simpleDateFormat.format(new Date());
-                    int diference = getDateDiference(dateActual,uFechaNacimiento.toString());
-                    uEdad = String.valueOf(diference);
+                    mUsuario = new Usuario(uNombre, uApellido, uFechaNacimiento, uEdad, uGenero, uCiudad, uEmail, uLogin, uPassword);
+                    Log.d(TAG, mUsuario.toString());
 
-                    int selectedRadioButtonID = rdgGenero.getCheckedRadioButtonId();
-                    if (selectedRadioButtonID != -1) {
+                    StringRequest postRequest = new StringRequest(Request.Method.POST, urlRegisterPost,
 
-                        RadioButton selectedRadioButton = (RadioButton) findViewById(selectedRadioButtonID);
-                        uGenero = selectedRadioButton.getText().toString();
-                        Log.d(TAG,  "selected: "+uGenero);
-
-
-                        mUsuario = new Usuario(uNombre, uApellido, uFechaNacimiento, uEdad, uGenero, uCiudad, uEmail, uLogin, uPassword);
-                        Log.d(TAG, mUsuario.toString());
-
-                        StringRequest postRequest = new StringRequest(Request.Method.POST, urlRegisterPost,
-                                new Response.Listener<String>()
-                                {
-                                    @Override
-                                    public void onResponse(String response) {
-                                        // response
-                                        Log.d(TAG,response.toString());
-                                        Toast.makeText(getApplicationContext(),"respuesta: "+response.toString(),Toast.LENGTH_LONG).show();
-                                        requestQueuePost.stop();
-                                    }
-                                },
-                                new Response.ErrorListener()
-                                {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        // error
-                                        Log.d("Error.Response", error.toString());
-                                        Toast.makeText(getApplicationContext(),"error "+error.toString(),Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                        ) {
-                            @Override
-                            protected Map<String, String> getParams()
+                            new Response.Listener<String>()
                             {
-                                Map<String, String>  params = mUsuario.getPostParams();
-                                return params;
+                                @Override
+                                public void onResponse(String response) {
+                                    // response
+                                    Log.d(TAG,response.toString());
+                                    Toast.makeText(getApplicationContext(),"respuesta: "+response.toString(),Toast.LENGTH_LONG).show();
+                                    requestQueuePost.stop();
+                                }
+                            },
+                            new Response.ErrorListener()
+                            {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    // error
+                                    Log.d("El servidor no responde", error.toString());
+                                    Toast.makeText(getApplicationContext(),"error "+error.toString(),Toast.LENGTH_LONG).show();
+                                }
                             }
-                        };
-                        requestQueuePost.add(postRequest);
+                    ) {
+                        @Override
+                        protected Map<String, String> getParams()
+                        {
+                            Map<String, String>  params = mUsuario.getPostParams();
+                            return params;
+                        }
+                    };
+                    requestQueuePost.add(postRequest);
 
-                    }
-                    else{
-                        Log.d(TAG,"no se ha seleccionado genero");
-                    }
                 }
 
             }
@@ -219,6 +224,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     public int getDateDiference(String stDate1,String stDate2){
 
+        final String TAG1="getDateDiference";
+
         int years =0;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -227,12 +234,12 @@ public class RegisterActivity extends AppCompatActivity {
             Date date2 = dateFormat.parse(stDate2);
 
             int dias = (int)((date1.getTime()-date2.getTime())/86400000);
-            Log.d(TAG,"La diferencia en dias es: "+dias);
+            Log.d(TAG1,"La diferencia en dias es: "+dias);
             years =(int)(dias/365);
-            Log.d(TAG,"La diferencia en años es: "+years);
+            Log.d(TAG1,"La diferencia en años es: "+years);
 
         }catch (Exception e){
-            Log.d(TAG,e.toString());
+            Log.d(TAG1,e.toString());
         }
 
 

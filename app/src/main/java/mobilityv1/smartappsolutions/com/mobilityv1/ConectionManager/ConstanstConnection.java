@@ -17,4 +17,6 @@ public interface ConstanstConnection {
 
     public final static String BASE_URL_API_REST="http://192.168.1.141:8001/apiRestV1/";
     public final static String URL_LOGIN="usuario/login/";
+    public final static String URL_USUARIO="usuario";
+
 }
