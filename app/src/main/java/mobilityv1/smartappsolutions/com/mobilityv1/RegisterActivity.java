@@ -1,10 +1,12 @@
 package mobilityv1.smartappsolutions.com.mobilityv1;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -21,17 +23,21 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
 import mobilityv1.smartappsolutions.com.mobilityv1.ConectionManager.ConstanstConnection;
+import mobilityv1.smartappsolutions.com.mobilityv1.clases.ShowDialog;
+import mobilityv1.smartappsolutions.com.mobilityv1.clases.ShowDialogProgressItem;
 import mobilityv1.smartappsolutions.com.mobilityv1.modelo.Usuario;
 
 /**
  * Created by user on 01/12/2017.
  */
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity implements ShowDialogProgressItem.ShowDialogProgressItemListener,ShowDialog.ShowDialogListener{
 
     private final static String TAG="RegisterActivity";
 
@@ -45,6 +51,9 @@ public class RegisterActivity extends AppCompatActivity {
     Spinner spinnerCiudad;
     RadioGroup rdgGenero;
     Button register;
+
+    ShowDialogProgressItem mShowDialogProgressItem;
+    ShowDialog mShowDialog;
 
     private int mYear, mMonth, mDay;
 
@@ -88,7 +97,6 @@ public class RegisterActivity extends AppCompatActivity {
         uFechaNacimiento="1990-01-01";
         fechaNacimiento.setText(uFechaNacimiento);
 
-        final RequestQueue requestQueuePost = Volley.newRequestQueue(RegisterActivity.this);
 
         ArrayAdapter adapter = ArrayAdapter.createFromResource( this, R.array.ciudades , android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -131,6 +139,12 @@ public class RegisterActivity extends AppCompatActivity {
                         },mYear,mMonth,mDay).show();
             }
         });
+
+        mShowDialogProgressItem = new ShowDialogProgressItem("Espere...", RegisterActivity.this, getApplicationContext());
+        mShowDialogProgressItem.setmShowDialogProgressItemListener(RegisterActivity.this);
+
+        mShowDialog = new ShowDialog("Error", "El servidor no responde", RegisterActivity.this, getApplicationContext());
+        mShowDialog.setmShowDialogListener(RegisterActivity.this);
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,6 +198,7 @@ public class RegisterActivity extends AppCompatActivity {
                     mUsuario = new Usuario(uNombre, uApellido, uFechaNacimiento, uEdad, uGenero, uCiudad, uEmail, uLogin, uPassword);
                     Log.d(TAG, mUsuario.toString());
 
+                    final RequestQueue requestQueuePost = Volley.newRequestQueue(RegisterActivity.this);
                     StringRequest postRequest = new StringRequest(Request.Method.POST, urlRegisterPost,
 
                             new Response.Listener<String>()
@@ -192,8 +207,37 @@ public class RegisterActivity extends AppCompatActivity {
                                 public void onResponse(String response) {
                                     // response
                                     Log.d(TAG,response.toString());
-                                    Toast.makeText(getApplicationContext(),"respuesta: "+response.toString(),Toast.LENGTH_LONG).show();
                                     requestQueuePost.stop();
+                                    mShowDialogProgressItem.dimissDialog();
+                                    //Toast.makeText(getApplicationContext(),"respuesta: "+response.toString(),Toast.LENGTH_LONG).show();
+
+                                    try{
+
+                                        JSONObject jsonResponse = new JSONObject(response.toString());
+
+                                        String status = jsonResponse.getString("status");
+                                        String mensaje= jsonResponse.getString("msg");
+
+                                        Log.d(TAG, "status: " + status+ " mensaje "+mensaje);
+
+                                        if (status.equals("true")) {
+                                            mShowDialog.setTitle("Mensaje");
+
+                                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        }else{
+                                            mShowDialog.setTitle("Error");
+                                        }
+
+                                        mShowDialog.setMessage(mensaje);
+                                        mShowDialog.showDialog();
+
+                                    }catch (Exception e){
+                                        Log.d(TAG,e.toString());
+                                    }
+
+
                                 }
                             },
                             new Response.ErrorListener()
@@ -201,8 +245,11 @@ public class RegisterActivity extends AppCompatActivity {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     // error
-                                    Log.d("El servidor no responde", error.toString());
-                                    Toast.makeText(getApplicationContext(),"error "+error.toString(),Toast.LENGTH_LONG).show();
+
+                                    Log.d(TAG, "El servidor no responde "+error.toString());
+
+
+                                    //Toast.makeText(getApplicationContext(),"error "+error.toString(),Toast.LENGTH_LONG).show();
                                 }
                             }
                     ) {
@@ -214,6 +261,7 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                     };
                     requestQueuePost.add(postRequest);
+                    mShowDialogProgressItem.showDialog();
 
                 }
 
@@ -244,5 +292,19 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         return  years;
+    }
+
+    @Override
+    public void onTimeOut() {
+
+        Log.d(TAG,"onTimeOut()");
+        mShowDialog.setMessage("El servidor no responde");
+        mShowDialog.showDialog();
+    }
+
+    @Override
+    public void onSetPositiveButton() {
+        Log.d(TAG,"ShowDialog | onSetPositiveButton()");
+        mShowDialog.dimissDialog();
     }
 }

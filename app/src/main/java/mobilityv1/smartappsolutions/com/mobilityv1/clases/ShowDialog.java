@@ -16,6 +16,9 @@ public class ShowDialog {
     private static final int TYPE_CONFIRMATION =2;
 
     String message;
+
+
+
     String title;
     int type =TYPE_INFO;
     Activity activity;
@@ -53,6 +56,15 @@ public class ShowDialog {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
 
     public void showDialog(){
 

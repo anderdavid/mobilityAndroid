@@ -39,7 +39,6 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
 
     public static final String TAG = "LoginActivity";
 
-
     EditText edtLogin;
     EditText edtPassword;
     TextView txvRegister;
@@ -196,6 +195,7 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
                         @Override
                         public void onErrorResponse(VolleyError error) {
 
+
                             mShowDialog.setMessage("El servidor no responde");
 
                         }
@@ -246,7 +246,9 @@ public class LoginActivity extends Activity implements ShowDialogProgressItem.Sh
     }
 
 
-    /////////////funciones de test ///////////////////////////////////////
+  /**
+   * FUNCIONES PARA TEST NO BORRRAR
+   * */
 
    /* public void testSQLite(){
       Localizacion localizacion;
